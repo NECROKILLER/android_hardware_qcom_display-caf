@@ -21,6 +21,7 @@
 #define DEBUG_COPYBIT 0
 #include <copybit.h>
 #include <utils/Timers.h>
+#include <mdp_version.h>
 #include "hwc_copybit.h"
 #include "comptype.h"
 #include "gr.h"
