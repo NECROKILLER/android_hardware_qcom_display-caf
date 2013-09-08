@@ -1,6 +1,10 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
+<<<<<<< HEAD
  * Copyright (c) 2011-2012, The Linux Foundation. All rights reserved.
+=======
+ * Copyright (c) 2011-2013, The Linux Foundation. All rights reserved.
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +38,9 @@
 
 #include <hardware/hardware.h>
 #include <hardware/gralloc.h>
-#include <genlock.h>
-
 #include <linux/android_pmem.h>
 
-#include "gralloc_priv.h"
+#include <gralloc_priv.h>
 #include "gr.h"
 #include "alloc_controller.h"
 #include "memalloc.h"
@@ -68,19 +70,25 @@ static int gralloc_map(gralloc_module_t const* module,
         IMemAlloc* memalloc = getAllocator(hnd->flags) ;
         int err = memalloc->map_buffer(&mappedAddress, size,
                                        hnd->offset, hnd->fd);
-        if(err) {
+        if(err || mappedAddress == MAP_FAILED) {
             ALOGE("Could not mmap handle %p, fd=%d (%s)",
                   handle, hnd->fd, strerror(errno));
             hnd->base = 0;
             return -errno;
         }
 
-        if (mappedAddress == MAP_FAILED) {
+        hnd->base = intptr_t(mappedAddress) + hnd->offset;
+        mappedAddress = MAP_FAILED;
+        size = ROUND_UP_PAGESIZE(sizeof(MetaData_t));
+        err = memalloc->map_buffer(&mappedAddress, size,
+                                       hnd->offset_metadata, hnd->fd_metadata);
+        if(err || mappedAddress == MAP_FAILED) {
             ALOGE("Could not mmap handle %p, fd=%d (%s)",
-                  handle, hnd->fd, strerror(errno));
-            hnd->base = 0;
+                  handle, hnd->fd_metadata, strerror(errno));
+            hnd->base_metadata = 0;
             return -errno;
         }
+<<<<<<< HEAD
         hnd->base = intptr_t(mappedAddress) + hnd->offset;
         mappedAddress = MAP_FAILED;
         size = ROUND_UP_PAGESIZE(sizeof(MetaData_t));
@@ -99,6 +107,8 @@ static int gralloc_map(gralloc_module_t const* module,
             hnd->base_metadata = 0;
             return -errno;
         }
+=======
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
         hnd->base_metadata = intptr_t(mappedAddress) + hnd->offset_metadata;
     }
     return 0;
@@ -163,24 +173,6 @@ int gralloc_register_buffer(gralloc_module_t const* module,
         return err;
     }
 
-    // Reset the genlock private fd flag in the handle
-    hnd->genlockPrivFd = -1;
-
-    // Check if there is a valid lock attached to the handle.
-    if (-1 == hnd->genlockHandle) {
-        ALOGE("%s: the lock is invalid.", __FUNCTION__);
-        gralloc_unmap(module, handle);
-        hnd->base = 0;
-        return -EINVAL;
-    }
-
-    // Attach the genlock handle
-    if (GENLOCK_NO_ERROR != genlock_attach_lock((native_handle_t *)handle)) {
-        ALOGE("%s: genlock_attach_lock failed", __FUNCTION__);
-        gralloc_unmap(module, handle);
-        hnd->base = 0;
-        return -EINVAL;
-    }
     return 0;
 }
 
@@ -203,6 +195,7 @@ int gralloc_unregister_buffer(gralloc_module_t const* module,
     }
     hnd->base = 0;
     hnd->base_metadata = 0;
+<<<<<<< HEAD
     // Release the genlock
     if (-1 != hnd->genlockHandle) {
         return genlock_release_lock((native_handle_t *)handle);
@@ -210,6 +203,8 @@ int gralloc_unregister_buffer(gralloc_module_t const* module,
         ALOGE("%s: there was no genlock attached to this buffer", __FUNCTION__);
         return -EINVAL;
     }
+=======
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     return 0;
 }
 
@@ -255,6 +250,7 @@ static int gralloc_map_and_invalidate (gralloc_module_t const* module,
             err = gralloc_map(module, handle);
             pthread_mutex_unlock(lock);
         }
+<<<<<<< HEAD
 
         // Lock the buffer for read/write operation as specified. Write lock
         // has a higher priority over read lock.
@@ -263,8 +259,27 @@ static int gralloc_map_and_invalidate (gralloc_module_t const* module,
             lockType = GENLOCK_WRITE_LOCK;
         } else if (usage & GRALLOC_USAGE_SW_READ_MASK) {
             lockType = GENLOCK_READ_LOCK;
+=======
+        if (hnd->flags & private_handle_t::PRIV_FLAGS_USES_ION) {
+            //Invalidate if reading in software. No need to do this for the
+            //metadata buffer as it is only read/written in software.
+            IMemAlloc* memalloc = getAllocator(hnd->flags) ;
+            err = memalloc->clean_buffer((void*)hnd->base,
+                                         hnd->size, hnd->offset, hnd->fd,
+                                         CACHE_INVALIDATE);
+            if (usage & GRALLOC_USAGE_SW_WRITE_MASK) {
+                // Mark the buffer to be flushed after cpu read/write
+                hnd->flags |= private_handle_t::PRIV_FLAGS_NEEDS_FLUSH;
+            }
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
         }
+    } else {
+        hnd->flags |= private_handle_t::PRIV_FLAGS_DO_NOT_FLUSH;
+    }
+    return err;
+}
 
+<<<<<<< HEAD
         int timeout = GENLOCK_MAX_TIMEOUT;
         if (GENLOCK_NO_ERROR != genlock_lock_buffer((native_handle_t *)handle,
                                                     (genlock_lock_type)lockType,
@@ -286,6 +301,46 @@ static int gralloc_map_and_invalidate (gralloc_module_t const* module,
             !(hnd->flags & private_handle_t::PRIV_FLAGS_FRAMEBUFFER)) {
             // Mark the buffer to be flushed after cpu read/write
             hnd->flags |= private_handle_t::PRIV_FLAGS_NEEDS_FLUSH;
+=======
+int gralloc_lock(gralloc_module_t const* module,
+                 buffer_handle_t handle, int usage,
+                 int l, int t, int w, int h,
+                 void** vaddr)
+{
+    private_handle_t* hnd = (private_handle_t*)handle;
+    int err = gralloc_map_and_invalidate(module, handle, usage, l, t, w, h);
+    if(!err)
+        *vaddr = (void*)hnd->base;
+    return err;
+}
+
+int gralloc_lock_ycbcr(gralloc_module_t const* module,
+                 buffer_handle_t handle, int usage,
+                 int l, int t, int w, int h,
+                 struct android_ycbcr *ycbcr)
+{
+    private_handle_t* hnd = (private_handle_t*)handle;
+    int err = gralloc_map_and_invalidate(module, handle, usage, l, t, w, h);
+    int ystride;
+    if(!err) {
+        //hnd->format holds our implementation defined format
+        //HAL_PIXEL_FORMAT_YCrCb_420_SP is the only one set right now.
+        switch (hnd->format) {
+            case HAL_PIXEL_FORMAT_YCrCb_420_SP:
+                ystride = ALIGN(hnd->width, 16);
+                ycbcr->y  = (void*)hnd->base;
+                ycbcr->cr = (void*)(hnd->base + ystride * hnd->height);
+                ycbcr->cb = (void*)(hnd->base + ystride * hnd->height + 1);
+                ycbcr->ystride = ystride;
+                ycbcr->cstride = ystride;
+                ycbcr->chroma_step = 2;
+                memset(ycbcr->reserved, 0, sizeof(ycbcr->reserved));
+                break;
+            default:
+                ALOGD("%s: Invalid format passed: 0x%x", __FUNCTION__,
+                      hnd->format);
+                err = -EINVAL;
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
         }
      } else {
         hnd->flags |= private_handle_t::PRIV_FLAGS_DO_NOT_FLUSH;
@@ -345,6 +400,7 @@ int gralloc_unlock(gralloc_module_t const* module,
     private_handle_t* hnd = (private_handle_t*)handle;
     IMemAlloc* memalloc = getAllocator(hnd->flags);
 
+<<<<<<< HEAD
     if (hnd->flags & private_handle_t::PRIV_FLAGS_NEEDS_FLUSH) {
         err = memalloc->clean_buffer((void*)hnd->base,
                                      hnd->size, hnd->offset, hnd->fd,
@@ -368,6 +424,25 @@ int gralloc_unlock(gralloc_module_t const* module,
         } else
             hnd->flags &= ~private_handle_t::PRIV_FLAGS_SW_LOCK;
     }
+=======
+    if (hnd->flags & private_handle_t::PRIV_FLAGS_USES_ION) {
+        if (hnd->flags & private_handle_t::PRIV_FLAGS_NEEDS_FLUSH) {
+            err = memalloc->clean_buffer((void*)hnd->base,
+                                         hnd->size, hnd->offset, hnd->fd,
+                                         CACHE_CLEAN_AND_INVALIDATE);
+            hnd->flags &= ~private_handle_t::PRIV_FLAGS_NEEDS_FLUSH;
+        } else if(hnd->flags & private_handle_t::PRIV_FLAGS_DO_NOT_FLUSH) {
+            hnd->flags &= ~private_handle_t::PRIV_FLAGS_DO_NOT_FLUSH;
+        } else {
+            //Probably a round about way to do this, but this avoids adding new
+            //flags
+            err = memalloc->clean_buffer((void*)hnd->base,
+                                         hnd->size, hnd->offset, hnd->fd,
+                                         CACHE_INVALIDATE);
+        }
+    }
+
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     return err;
 }
 
@@ -409,6 +484,10 @@ int gralloc_perform(struct gralloc_module_t const* module,
                 break;
 
             }
+<<<<<<< HEAD
+=======
+#ifdef QCOM_BSP
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
         case GRALLOC_MODULE_PERFORM_UPDATE_BUFFER_GEOMETRY:
             {
                 int width = va_arg(args, int);
@@ -424,6 +503,10 @@ int gralloc_perform(struct gralloc_module_t const* module,
                 res = 0;
             }
             break;
+<<<<<<< HEAD
+=======
+#endif
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
         case GRALLOC_MODULE_PERFORM_GET_STRIDE:
             {
                 int width   = va_arg(args, int);

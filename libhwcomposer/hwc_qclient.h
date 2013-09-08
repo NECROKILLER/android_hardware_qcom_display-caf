@@ -46,7 +46,11 @@ class QClient : public BnQClient {
 public:
     QClient(hwc_context_t *ctx);
     virtual ~QClient();
+<<<<<<< HEAD
     virtual void notifyCallback(uint32_t msg, uint32_t value);
+=======
+    virtual android::status_t notifyCallback(uint32_t msg, uint32_t value);
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 
 private:
     //Notifies of Media Player death
@@ -59,6 +63,11 @@ private:
 
     void securing(uint32_t startEnd);
     void unsecuring(uint32_t startEnd);
+<<<<<<< HEAD
+=======
+    android::status_t screenRefresh();
+    void setExtOrientation(uint32_t orientation);
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 
     hwc_context_t *mHwcContext;
     const android::sp<android::IMediaDeathNotifier> mMPDeathNotifier;

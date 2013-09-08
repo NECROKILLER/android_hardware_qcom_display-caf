@@ -134,7 +134,10 @@ static int get_format(int format) {
         case HAL_PIXEL_FORMAT_YCbCr_422_SP:  return MDP_Y_CBCR_H2V1;
         case HAL_PIXEL_FORMAT_YCbCr_420_SP:  return MDP_Y_CBCR_H2V2;
         case HAL_PIXEL_FORMAT_YCrCb_420_SP_ADRENO: return MDP_Y_CBCR_H2V2_ADRENO;
+<<<<<<< HEAD
         case HAL_PIXEL_FORMAT_YCbCr_420_SP_VENUS: return MDP_Y_CBCR_H2V2_ADRENO;
+=======
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
         case HAL_PIXEL_FORMAT_NV12_ENCODEABLE: return MDP_Y_CBCR_H2V2;
     }
     return -1;
@@ -463,7 +466,11 @@ static int stretch_copybit(
 
         if(src->format ==  HAL_PIXEL_FORMAT_YV12) {
             int usage =
+<<<<<<< HEAD
             GRALLOC_USAGE_PRIVATE_IOMMU_HEAP|GRALLOC_USAGE_PRIVATE_CAMERA_HEAP|GRALLOC_USAGE_PRIVATE_UNCACHED;
+=======
+            GRALLOC_USAGE_PRIVATE_ADSP_HEAP|GRALLOC_USAGE_PRIVATE_UNCACHED;
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
             if (0 == alloc_buffer(&yv12_handle,src->w,src->h,
                                   src->format, usage)){
                 if(0 == convertYV12toYCrCb420SP(src,yv12_handle)){
@@ -552,7 +559,10 @@ static int blit_copybit(
 static int finish_copybit(struct copybit_device_t *dev)
 {
     // NOP for MDP copybit
+<<<<<<< HEAD
     return 0;
+=======
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 }
 
 /*****************************************************************************/
@@ -605,7 +615,10 @@ static int open_copybit(const struct hw_module_t* module, const char* name,
     ctx->device.set_sync = set_sync_copybit;
     ctx->device.stretch = stretch_copybit;
     ctx->device.finish = finish_copybit;
+<<<<<<< HEAD
     ctx->device.flush_get_fence = flush_get_fence;
+=======
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     ctx->mAlpha = MDP_ALPHA_NOP;
     ctx->mFlags = 0;
     ctx->sync.flags = 0;

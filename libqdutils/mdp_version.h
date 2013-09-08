@@ -1,5 +1,9 @@
 /*
+<<<<<<< HEAD
  * Copyright (c) 2012, The Linux Foundation. All rights reserved.
+=======
+ * Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -72,10 +76,18 @@ public:
     int getMDPVersion() {return mMDPVersion;}
     char getPanelType() {return mPanelType;}
     bool hasOverlay() {return mHasOverlay;}
+    uint8_t getTotalPipes() { return (mRGBPipes + mVGPipes + mDMAPipes);}
+    uint8_t getRGBPipes() { return mRGBPipes; }
+    uint8_t getVGPipes() { return mVGPipes; }
+    uint8_t getDMAPipes() { return mDMAPipes; }
 private:
     int mMDPVersion;
     char mPanelType;
     bool mHasOverlay;
+    uint32_t mMdpRev;
+    uint8_t mRGBPipes;
+    uint8_t mVGPipes;
+    uint8_t mDMAPipes;
 };
 }; //namespace qdutils
 #endif //INCLUDE_LIBQCOMUTILS_MDPVER

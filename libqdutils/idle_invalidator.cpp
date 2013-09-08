@@ -45,6 +45,7 @@ int IdleInvalidator::init(InvalidatorHandler reg_handler, void* user_data,
                           unsigned int idleSleepTime) {
     ALOGD_IF(II_DEBUG, "%s", __func__);
 
+    Locker::Autolock _l(mLock);
     /* store registered handler */
     mHandler = reg_handler;
     mHwcContext = user_data;
@@ -55,6 +56,8 @@ int IdleInvalidator::init(InvalidatorHandler reg_handler, void* user_data,
 bool IdleInvalidator::threadLoop() {
     ALOGD_IF(II_DEBUG, "%s", __func__);
     usleep(mSleepTime * 500);
+
+    Locker::Autolock _l(mLock);
     if(mSleepAgain) {
         //We need to sleep again!
         mSleepAgain = false;

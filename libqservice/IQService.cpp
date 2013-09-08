@@ -63,6 +63,24 @@ public:
         data.writeStrongBinder(client->asBinder());
         remote()->transact(CONNECT, data, &reply);
     }
+<<<<<<< HEAD
+=======
+
+    virtual status_t screenRefresh() {
+        Parcel data, reply;
+        data.writeInterfaceToken(IQService::getInterfaceDescriptor());
+        remote()->transact(SCREEN_REFRESH, data, &reply);
+        status_t result = reply.readInt32();
+        return result;
+    }
+
+    virtual void setExtOrientation(uint32_t orientation) {
+        Parcel data, reply;
+        data.writeInterfaceToken(IQService::getInterfaceDescriptor());
+        data.writeInt32(orientation);
+        remote()->transact(EXTERNAL_ORIENTATION, data, &reply);
+    }
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 };
 
 IMPLEMENT_META_INTERFACE(QService, "android.display.IQService");
@@ -88,7 +106,8 @@ status_t BnQService::onTransact(
     switch(code) {
         case SECURING: {
             if(!permission) {
-                ALOGE("display.qservice SECURING access denied: pid=%d uid=%d process=%s",
+                ALOGE("display.qservice SECURING access denied: \
+                      pid=%d uid=%d process=%s",
                       callerPid, callerUid, callingProcName);
                 return PERMISSION_DENIED;
             }
@@ -99,7 +118,8 @@ status_t BnQService::onTransact(
         } break;
         case UNSECURING: {
             if(!permission) {
-                ALOGE("display.qservice UNSECURING access denied: pid=%d uid=%d process=%s",
+                ALOGE("display.qservice UNSECURING access denied: \
+                      pid=%d uid=%d process=%s",
                       callerPid, callerUid, callingProcName);
                 return PERMISSION_DENIED;
             }
@@ -111,7 +131,12 @@ status_t BnQService::onTransact(
         case CONNECT: {
             CHECK_INTERFACE(IQService, data, reply);
             if(callerUid != AID_GRAPHICS) {
+<<<<<<< HEAD
                 ALOGE("display.qservice CONNECT access denied: pid=%d uid=%d process=%s",
+=======
+                ALOGE("display.qservice CONNECT access denied: \
+                      pid=%d uid=%d process=%s",
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
                       callerPid, callerUid, callingProcName);
                 return PERMISSION_DENIED;
             }
@@ -120,6 +145,31 @@ status_t BnQService::onTransact(
             connect(client);
             return NO_ERROR;
         } break;
+<<<<<<< HEAD
+=======
+        case SCREEN_REFRESH: {
+            CHECK_INTERFACE(IQService, data, reply);
+            if(callerUid != AID_SYSTEM) {
+                ALOGE("display.qservice SCREEN_REFRESH access denied: \
+                      pid=%d uid=%d process=%s",callerPid,
+                      callerUid, callingProcName);
+                return PERMISSION_DENIED;
+            }
+            return screenRefresh();
+        } break;
+        case EXTERNAL_ORIENTATION: {
+            CHECK_INTERFACE(IQService, data, reply);
+            if(callerUid != AID_SYSTEM) {
+                ALOGE("display.qservice EXTERNAL_ORIENTATION access denied: \
+                      pid=%d uid=%d process=%s",callerPid,
+                      callerUid, callingProcName);
+                return PERMISSION_DENIED;
+            }
+            uint32_t orientation = data.readInt32();
+            setExtOrientation(orientation);
+            return NO_ERROR;
+        } break;
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
         default:
             return BBinder::onTransact(code, data, reply, flags);
     }

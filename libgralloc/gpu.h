@@ -1,6 +1,10 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
+<<<<<<< HEAD
  * Copyright (c) 2011-2012, The Linux Foundation. All rights reserved.
+=======
+ * Copyright (c) 2011-2013, The Linux Foundation. All rights reserved.
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +30,8 @@
 #include <cutils/log.h>
 #include <cutils/ashmem.h>
 
-#include "gralloc_priv.h"
-#include <fb_priv.h>
+#include <gralloc_priv.h>
+#include "fb_priv.h"
 
 namespace gralloc {
 class IAllocController;
@@ -35,12 +39,6 @@ class gpu_context_t : public alloc_device_t {
     public:
     gpu_context_t(const private_module_t* module,
                   IAllocController* alloc_ctrl);
-
-    int gralloc_alloc_framebuffer_locked(size_t size, int usage,
-                                         buffer_handle_t* pHandle);
-
-    int gralloc_alloc_framebuffer(size_t size, int usage,
-                                  buffer_handle_t* pHandle);
 
     int gralloc_alloc_buffer(size_t size, int usage,
                              buffer_handle_t* pHandle,
@@ -57,6 +55,11 @@ class gpu_context_t : public alloc_device_t {
                              int format, int usage,
                              buffer_handle_t* pHandle,
                              int* pStride);
+    int gralloc_alloc_framebuffer_locked(size_t size, int usage,
+                                         buffer_handle_t* pHandle);
+
+    int gralloc_alloc_framebuffer(size_t size, int usage,
+                                  buffer_handle_t* pHandle);
 
     static int gralloc_free(alloc_device_t* dev, buffer_handle_t handle);
 

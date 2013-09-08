@@ -1,6 +1,10 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
+<<<<<<< HEAD
  * Copyright (c) 2010-2012 The Linux Foundation. All rights reserved.
+=======
+ * Copyright (c) 2010-2013 The Linux Foundation. All rights reserved.
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +40,9 @@
 
 #include <GLES/gl.h>
 
-#include "gralloc_priv.h"
+#include <gralloc_priv.h>
 #include "fb_priv.h"
 #include "gr.h"
-#include <genlock.h>
 #include <cutils/properties.h>
 #include <profiler.h>
 
@@ -55,7 +58,6 @@ static inline int max(int a, int b) {
 
 enum {
     PAGE_FLIP = 0x00000001,
-    LOCKED    = 0x00000002
 };
 
 struct fb_context_t {
@@ -86,6 +88,7 @@ static int fb_setSwapInterval(struct framebuffer_device_t* dev,
 
 static int fb_post(struct framebuffer_device_t* dev, buffer_handle_t buffer)
 {
+<<<<<<< HEAD
     if (private_handle_t::validate(buffer) < 0)
         return -EINVAL;
 
@@ -131,6 +134,19 @@ static int fb_post(struct framebuffer_device_t* dev, buffer_handle_t buffer)
 
         CALC_FPS();
         m->currentBuffer = hnd;
+=======
+    private_module_t* m =
+        reinterpret_cast<private_module_t*>(dev->common.module);
+    private_handle_t *hnd = static_cast<private_handle_t*>
+        (const_cast<native_handle_t*>(buffer));
+    const size_t offset = hnd->base - m->framebuffer->base;
+    m->info.activate = FB_ACTIVATE_VBL;
+    m->info.yoffset = offset / m->finfo.line_length;
+    if (ioctl(m->framebuffer->fd, FBIOPUT_VSCREENINFO, &m->info) == -1) {
+        ALOGE("%s: FBIOPUT_VSCREENINFO for primary failed, str: %s",
+                __FUNCTION__, strerror(errno));
+        return -errno;
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     }
     return 0;
 }
@@ -352,7 +368,7 @@ int mapFrameBufferLocked(struct private_module_t* module)
     size_t fbSize = roundUpToPageSize(finfo.line_length * info.yres)*
                     module->numBuffers;
     module->framebuffer = new private_handle_t(fd, fbSize,
-                                        private_handle_t::PRIV_FLAGS_USES_PMEM,
+                                        private_handle_t::PRIV_FLAGS_USES_ION,
                                         BUFFER_TYPE_UI,
                                         module->fbFormat, info.xres, info.yres);
     void* vaddr = mmap(0, fbSize, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
@@ -363,20 +379,24 @@ int mapFrameBufferLocked(struct private_module_t* module)
     module->framebuffer->base = intptr_t(vaddr);
     memset(vaddr, 0, fbSize);
     module->currentOffset = 0;
-    module->fbPostDone = false;
-    pthread_mutex_init(&(module->fbPostLock), NULL);
-    pthread_cond_init(&(module->fbPostCond), NULL);
-    module->fbPanDone = false;
-    pthread_mutex_init(&(module->fbPanLock), NULL);
-    pthread_cond_init(&(module->fbPanCond), NULL);
+    //Enable vsync
+    int enable = 1;
+    ioctl(module->framebuffer->fd, MSMFB_OVERLAY_VSYNC_CTRL,
+             &enable);
     return 0;
 }
 
 static int mapFrameBuffer(struct private_module_t* module)
 {
-    pthread_mutex_lock(&module->lock);
-    int err = mapFrameBufferLocked(module);
-    pthread_mutex_unlock(&module->lock);
+    int err = -1;
+    char property[PROPERTY_VALUE_MAX];
+    if((property_get("debug.gralloc.map_fb_memory", property, NULL) > 0) &&
+       (!strncmp(property, "1", PROPERTY_VALUE_MAX ) ||
+        (!strncasecmp(property,"true", PROPERTY_VALUE_MAX )))) {
+        pthread_mutex_lock(&module->lock);
+        err = mapFrameBufferLocked(module);
+        pthread_mutex_unlock(&module->lock);
+    }
     return err;
 }
 
@@ -386,9 +406,7 @@ static int fb_close(struct hw_device_t *dev)
 {
     fb_context_t* ctx = (fb_context_t*)dev;
     if (ctx) {
-        //Hack until fbdev is removed. Framework could close this causing hwc a
-        //pain.
-        //free(ctx);
+        free(ctx);
     }
     return 0;
 }

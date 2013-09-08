@@ -1,5 +1,9 @@
 /*
+<<<<<<< HEAD
  * Copyright (c) 2012, The Linux Foundation. All rights reserved.
+=======
+ * Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -35,6 +39,10 @@
 
 int setMetaData(private_handle_t *handle, DispParamType paramType,
                                                     void *param) {
+<<<<<<< HEAD
+=======
+#ifdef QCOM_BSP
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     if (!handle) {
         ALOGE("%s: Private handle is null!", __func__);
         return -1;
@@ -43,6 +51,13 @@ int setMetaData(private_handle_t *handle, DispParamType paramType,
         ALOGE("%s: Bad fd for extra data!", __func__);
         return -1;
     }
+<<<<<<< HEAD
+=======
+    if (!param) {
+        ALOGE("%s: input param is null!", __func__);
+        return -1;
+    }
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     unsigned long size = ROUND_UP_PAGESIZE(sizeof(MetaData_t));
     void *base = mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED,
         handle->fd_metadata, 0);
@@ -65,6 +80,18 @@ int setMetaData(private_handle_t *handle, DispParamType paramType,
         case PP_PARAM_INTERLACED:
             data->interlaced = *((int32_t *)param);
             break;
+<<<<<<< HEAD
+=======
+        case PP_PARAM_IGC:
+            memcpy((void *)&data->igcData, param, sizeof(IGCData_t));
+            break;
+        case PP_PARAM_SHARP2:
+            memcpy((void *)&data->Sharp2Data, param, sizeof(Sharp2Data_t));
+            break;
+        case UPDATE_BUFFER_GEOMETRY:
+            memcpy((void *)&data->bufferDim, param, sizeof(BufferDim_t));
+            break;
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
         default:
             ALOGE("Unknown paramType %d", paramType);
             break;
@@ -72,5 +99,9 @@ int setMetaData(private_handle_t *handle, DispParamType paramType,
     if(munmap(base, size))
         ALOGE("%s: failed to unmap ptr 0x%x, err %d", __func__, (int)base,
                                                                         errno);
+<<<<<<< HEAD
+=======
+#endif
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     return 0;
 }

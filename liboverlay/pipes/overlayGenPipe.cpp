@@ -33,8 +33,13 @@
 
 namespace overlay {
 
+<<<<<<< HEAD
 GenericPipe::GenericPipe(int dpy) : mFbNum(dpy), mRot(0), mRotUsed(false),
         mRotDownscaleOpt(false), pipeState(CLOSED) {
+=======
+GenericPipe::GenericPipe(int dpy) : mDpy(dpy), mRotDownscaleOpt(false),
+    pipeState(CLOSED) {
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     init();
 }
 
@@ -45,6 +50,7 @@ GenericPipe::~GenericPipe() {
 bool GenericPipe::init()
 {
     ALOGE_IF(DEBUG_OVERLAY, "GenericPipe init");
+<<<<<<< HEAD
     mRotUsed = false;
     mRotDownscaleOpt = false;
     if(mFbNum)
@@ -53,18 +59,39 @@ bool GenericPipe::init()
     ALOGD_IF(DEBUG_OVERLAY,"%s: mFbNum:%d",__FUNCTION__, mFbNum);
 
     if(!mCtrlData.ctrl.init(mFbNum)) {
+=======
+    mRotDownscaleOpt = false;
+
+    int fbNum = Overlay::getFbForDpy(mDpy);
+    if( fbNum < 0 ) {
+        ALOGE("%s: Invalid FB for the display: %d",__FUNCTION__, mDpy);
+        return false;
+    }
+
+    ALOGD_IF(DEBUG_OVERLAY,"%s: mFbNum:%d",__FUNCTION__, fbNum);
+
+
+    if(!mCtrlData.ctrl.init(fbNum)) {
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
         ALOGE("GenericPipe failed to init ctrl");
         return false;
     }
 
+<<<<<<< HEAD
     if(!mCtrlData.data.init(mFbNum)) {
+=======
+    if(!mCtrlData.data.init(fbNum)) {
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
         ALOGE("GenericPipe failed to init data");
         return false;
     }
 
+<<<<<<< HEAD
     //get a new rotator object, take ownership
     mRot = Rotator::getRotator();
 
+=======
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     return true;
 }
 
@@ -80,13 +107,17 @@ bool GenericPipe::close() {
         ret = false;
     }
 
+<<<<<<< HEAD
     delete mRot;
     mRot = 0;
 
+=======
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     setClosed();
     return ret;
 }
 
+<<<<<<< HEAD
 bool GenericPipe::setSource(
         const utils::PipeArgs& args)
 {
@@ -135,6 +166,28 @@ bool GenericPipe::setPosition(const utils::Dim& d)
 void GenericPipe::setRotatorUsed(const bool& rotUsed) {
     mRot->setRotatorUsed(rotUsed);
     mCtrlData.ctrl.setRotatorUsed(rotUsed);
+=======
+void GenericPipe::setSource(const utils::PipeArgs& args) {
+    mRotDownscaleOpt = args.rotFlags & utils::ROT_DOWNSCALE_ENABLED;
+    mCtrlData.ctrl.setSource(args);
+}
+
+void GenericPipe::setCrop(const overlay::utils::Dim& d) {
+    mCtrlData.ctrl.setCrop(d);
+}
+
+void GenericPipe::setTransform(const utils::eTransform& orient) {
+    mCtrlData.ctrl.setTransform(orient);
+}
+
+void GenericPipe::setPosition(const utils::Dim& d) {
+    mCtrlData.ctrl.setPosition(d);
+}
+
+bool GenericPipe::setVisualParams(const MetaData_t &metadata)
+{
+        return mCtrlData.ctrl.setVisualParams(metadata);
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 }
 
 bool GenericPipe::commit() {
@@ -142,6 +195,7 @@ bool GenericPipe::commit() {
     int downscale_factor = utils::ROT_DS_NONE;
 
     if(mRotDownscaleOpt) {
+<<<<<<< HEAD
         /* Can go ahead with calculation of downscale_factor since
          * we consider area when calculating it */
         downscale_factor = mCtrlData.ctrl.getDownscalefactor();
@@ -182,6 +236,17 @@ bool GenericPipe::commit() {
         mRot = Rotator::getRotator();
     }
 
+=======
+        ovutils::Dim src(mCtrlData.ctrl.getCrop());
+        ovutils::Dim dst(mCtrlData.ctrl.getPosition());
+        downscale_factor = ovutils::getDownscaleFactor(
+                src.w, src.h, dst.w, dst.h);
+    }
+
+    mCtrlData.ctrl.setDownscale(downscale_factor);
+    ret = mCtrlData.ctrl.commit();
+
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     pipeState = ret ? OPEN : CLOSED;
     return ret;
 }
@@ -194,6 +259,7 @@ bool GenericPipe::queueBuffer(int fd, uint32_t offset) {
     // set pipe id from ctrl to data
     mCtrlData.data.setPipeId(pipeId);
 
+<<<<<<< HEAD
     int finalFd = fd;
     uint32_t finalOffset = offset;
     //If rotator is to be used, queue to it, so it can ROTATE.
@@ -214,17 +280,23 @@ bool GenericPipe::queueBuffer(int fd, uint32_t offset) {
         }
     }
     return mCtrlData.data.queueBuffer(finalFd, finalOffset);
+=======
+    return mCtrlData.data.queueBuffer(fd, offset);
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 }
 
 int GenericPipe::getCtrlFd() const {
     return mCtrlData.ctrl.getFd();
 }
 
+<<<<<<< HEAD
 utils::ScreenInfo GenericPipe::getScreenInfo() const
 {
     return mCtrlData.ctrl.getScreenInfo();
 }
 
+=======
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 utils::Dim GenericPipe::getCrop() const
 {
     return mCtrlData.ctrl.getCrop();
@@ -234,18 +306,27 @@ void GenericPipe::dump() const
 {
     ALOGE("== Dump Generic pipe start ==");
     ALOGE("pipe state = %d", (int)pipeState);
+<<<<<<< HEAD
     OVASSERT(mRot, "GenericPipe should have a valid Rot");
     mCtrlData.ctrl.dump();
     mCtrlData.data.dump();
     mRot->dump();
+=======
+    mCtrlData.ctrl.dump();
+    mCtrlData.data.dump();
+
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     ALOGE("== Dump Generic pipe end ==");
 }
 
 void GenericPipe::getDump(char *buf, size_t len) {
     mCtrlData.ctrl.getDump(buf, len);
     mCtrlData.data.getDump(buf, len);
+<<<<<<< HEAD
     if(mRotUsed && mRot)
         mRot->getDump(buf, len);
+=======
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 }
 
 bool GenericPipe::isClosed() const  {
@@ -261,5 +342,11 @@ bool GenericPipe::setClosed() {
     return true;
 }
 
+<<<<<<< HEAD
+=======
+void GenericPipe::forceSet() {
+    mCtrlData.ctrl.forceSet();
+}
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 
 } //namespace overlay

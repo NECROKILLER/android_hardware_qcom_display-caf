@@ -1,5 +1,9 @@
 /*
+<<<<<<< HEAD
 * Copyright (c) 2011-2012, The Linux Foundation. All rights reserved.
+=======
+* Copyright (c) 2011-2013, The Linux Foundation. All rights reserved.
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 *
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted provided that the following conditions are
@@ -31,67 +35,78 @@
 #define OVERLAY_GENERIC_PIPE_H
 
 #include "overlayUtils.h"
-#include "overlayRotator.h"
 #include "overlayCtrlData.h"
 
 namespace overlay {
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 class GenericPipe : utils::NoCopy {
 public:
     /* ctor */
     explicit GenericPipe(int dpy);
     /* dtor */
     ~GenericPipe();
+<<<<<<< HEAD
     /* CTRL/DATA init. Not owning rotator, will not  init it */
     bool init();
     /* CTRL/DATA close. Not owning rotator, will not close it */
+=======
+    bool init();
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     bool close();
-
     /* Control APIs */
     /* set source using whf, orient and wait flag */
-    bool setSource(const utils::PipeArgs& args);
+    void setSource(const utils::PipeArgs& args);
     /* set crop a.k.a the region of interest */
-    bool setCrop(const utils::Dim& d);
+    void setCrop(const utils::Dim& d);
     /* set orientation*/
-    bool setTransform(const utils::eTransform& param);
+    void setTransform(const utils::eTransform& param);
     /* set mdp posision using dim */
-    bool setPosition(const utils::Dim& dim);
+    void setPosition(const utils::Dim& dim);
+    /* set visual param */
+    bool setVisualParams(const MetaData_t &metadata);
     /* commit changes to the overlay "set"*/
     bool commit();
-
     /* Data APIs */
     /* queue buffer to the overlay */
     bool queueBuffer(int fd, uint32_t offset);
-
     /* return cached startup args */
     const utils::PipeArgs& getArgs() const;
-
-    /* retrieve screen info */
-    utils::ScreenInfo getScreenInfo() const;
-
     /* retrieve cached crop data */
     utils::Dim getCrop() const;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     /* is closed */
     bool isClosed() const;
-
     /* is open */
     bool isOpen() const;
-
     /* return Ctrl fd. Used for S3D */
     int getCtrlFd() const;
-
     /* dump the state of the object */
     void dump() const;
+<<<<<<< HEAD
 
     /* Return the dump in the specified buffer */
     void getDump(char *buf, size_t len);
+=======
+    /* Return the dump in the specified buffer */
+    void getDump(char *buf, size_t len);
+    /* Marks the pipe for forcible setting of params
+     * even if they haven't changed
+     */
+    void forceSet();
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 
 private:
     /* set Closed pipe */
     bool setClosed();
 
+<<<<<<< HEAD
     /* Set whether rotator can be used */
     void setRotatorUsed(const bool& rotUsed);
 
@@ -109,6 +124,14 @@ private:
     //not a candidate, we might not do it.
     bool mRotDownscaleOpt;
 
+=======
+    int mDpy;
+    /* Ctrl/Data aggregator */
+    CtrlData mCtrlData;
+    //Whether we will do downscale opt. This is just a request. If the frame is
+    //not a candidate, we might not do it.
+    bool mRotDownscaleOpt;
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     /* Pipe open or closed */
     enum ePipeState {
         CLOSED,

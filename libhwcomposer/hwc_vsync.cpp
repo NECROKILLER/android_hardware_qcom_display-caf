@@ -28,6 +28,10 @@
 #include "hwc_utils.h"
 #include "string.h"
 #include "external.h"
+<<<<<<< HEAD
+=======
+#include "overlay.h"
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 
 namespace qhwc {
 
@@ -60,7 +64,6 @@ static void *vsync_loop(void *param)
                 android::PRIORITY_MORE_FAVORABLE);
 
     const int MAX_DATA = 64;
-    const int MAX_RETRY_COUNT = 100;
     static char vdata[MAX_DATA];
 
     uint64_t cur_timestamp=0;
@@ -86,6 +89,8 @@ static void *vsync_loop(void *param)
        */
     fd_timestamp = open(vsync_timestamp_fb0, O_RDONLY);
     if (fd_timestamp < 0) {
+        // Make sure fb device is opened before starting this thread so this
+        // never happens.
         ALOGE ("FATAL:%s:not able to open file:%s, %s",  __FUNCTION__,
                (fb1_vsync) ? vsync_timestamp_fb1 : vsync_timestamp_fb0,
                strerror(errno));
@@ -93,6 +98,7 @@ static void *vsync_loop(void *param)
     }
 
     do {
+<<<<<<< HEAD
         pthread_mutex_lock(&ctx->vstate.lock);
         while (ctx->vstate.enable == false) {
             pthread_cond_wait(&ctx->vstate.cond, &ctx->vstate.lock);
@@ -120,10 +126,35 @@ static void *vsync_loop(void *param)
                 ctx->vstate.fakevsync = true;
             }
 
+=======
+        if (LIKELY(!ctx->vstate.fakevsync)) {
+            nsecs_t vsync_start_time = systemTime();
+            len = pread(fd_timestamp, vdata, MAX_DATA, 0);
+            if(ctx->vstate.enable == true) {
+                nsecs_t time_taken = systemTime()-vsync_start_time;
+                nsecs_t  threshold = ctx->dpyAttr[dpy].vsync_period*2;
+                ALOGW_IF(time_taken > threshold,
+                         "Excessive delay reading vsync: took %lld ms",
+                         ns2ms(time_taken));
+            }
+            if (len < 0) {
+                // If the read was just interrupted - it is not a fatal error
+                // In either case, just continue.
+                if (errno != EAGAIN &&
+                    errno != EINTR  &&
+                    errno != EBUSY) {
+                    ALOGE ("FATAL:%s:not able to read file:%s, %s",
+                           __FUNCTION__,
+                           vsync_timestamp_fb0, strerror(errno));
+                }
+                continue;
+            }
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
             // extract timestamp
             const char *str = vdata;
             if (!strncmp(str, "VSYNC=", strlen("VSYNC="))) {
                 cur_timestamp = strtoull(str + strlen("VSYNC="), NULL, 0);
+<<<<<<< HEAD
             } else {
                 ALOGE ("FATAL: %s: vsync timestamp not in correct format: [%s]",
                        __FUNCTION__,
@@ -133,6 +164,11 @@ static void *vsync_loop(void *param)
 
         } else {
             usleep(16000);
+=======
+            }
+        } else {
+            usleep(16666);
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
             cur_timestamp = systemTime();
         }
         // send timestamp to HAL

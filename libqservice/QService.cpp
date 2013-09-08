@@ -61,6 +61,23 @@ void QService::unsecuring(uint32_t startEnd) {
 
 void QService::connect(const sp<qClient::IQClient>& client) {
     mClient = client;
+<<<<<<< HEAD
+=======
+}
+
+android::status_t QService::screenRefresh() {
+    status_t result = NO_ERROR;
+    if(mClient.get()) {
+        result = mClient->notifyCallback(SCREEN_REFRESH, 0);
+    }
+    return result;
+}
+
+void QService::setExtOrientation(uint32_t orientation) {
+    if(mClient.get()) {
+        mClient->notifyCallback(EXTERNAL_ORIENTATION, orientation);
+    }
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 }
 
 void QService::init()

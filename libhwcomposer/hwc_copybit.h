@@ -43,6 +43,7 @@ public:
     private_handle_t * getCurrentRenderBuffer();
 
     void setReleaseFd(int fd);
+<<<<<<< HEAD
 
 private:
     // holds the copybit device
@@ -63,12 +64,46 @@ private:
     unsigned int getRGBRenderingArea
                             (const hwc_display_contents_1_t *list);
 
+=======
+
+private:
+    // holds the copybit device
+    struct copybit_device_t *mEngine;
+    // Helper functions for copybit composition
+    int  drawLayerUsingCopybit(hwc_context_t *dev, hwc_layer_1_t *layer,
+                                       private_handle_t *renderBuffer, int dpy);
+    bool canUseCopybitForYUV (hwc_context_t *ctx);
+    bool canUseCopybitForRGB (hwc_context_t *ctx,
+                                     hwc_display_contents_1_t *list, int dpy);
+    bool validateParams (hwc_context_t *ctx,
+                                const hwc_display_contents_1_t *list);
+    //Flags if this feature is on.
+    bool mIsModeOn;
+    // flag that indicates whether CopyBit composition is enabled for this cycle
+    bool mCopyBitDraw;
+
+    unsigned int getRGBRenderingArea
+                            (const hwc_display_contents_1_t *list);
+
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     void getLayerResolution(const hwc_layer_1_t* layer,
                                    unsigned int &width, unsigned int& height);
 
     int allocRenderBuffers(int w, int h, int f);
 
     void freeRenderBuffers();
+
+<<<<<<< HEAD
+    private_handle_t* mRenderBuffer[NUM_RENDER_BUFFERS];
+
+    // Index of the current intermediate render buffer
+    int mCurRenderBufferIndex;
+
+    //These are the the release FDs of the T-2 and T-1 round
+    //We wait on the T-2 fence
+    int mRelFd[2];
+=======
+    int clear (private_handle_t* hnd, hwc_rect_t& rect);
 
     private_handle_t* mRenderBuffer[NUM_RENDER_BUFFERS];
 
@@ -78,6 +113,10 @@ private:
     //These are the the release FDs of the T-2 and T-1 round
     //We wait on the T-2 fence
     int mRelFd[2];
+
+    //Dynamic composition threshold for deciding copybit usage.
+    double mDynThreshold;
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 };
 
 }; //namespace qhwc

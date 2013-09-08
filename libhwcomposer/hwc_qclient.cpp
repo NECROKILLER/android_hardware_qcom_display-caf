@@ -42,11 +42,15 @@ namespace qClient {
 QClient::QClient(hwc_context_t *ctx) : mHwcContext(ctx),
         mMPDeathNotifier(new MPDeathNotifier(ctx))
 {
+<<<<<<< HEAD
 
     ALOGD_IF(QCLIENT_DEBUG, "QClient Constructor invoked");
     //The only way to make this class in this process subscribe to media
     //player's death.
     IMediaDeathNotifier::getMediaPlayerService();
+=======
+    ALOGD_IF(QCLIENT_DEBUG, "QClient Constructor invoked");
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 }
 
 QClient::~QClient()
@@ -54,7 +58,11 @@ QClient::~QClient()
     ALOGD_IF(QCLIENT_DEBUG,"QClient Destructor invoked");
 }
 
+<<<<<<< HEAD
 void QClient::notifyCallback(uint32_t msg, uint32_t value) {
+=======
+status_t QClient::notifyCallback(uint32_t msg, uint32_t value) {
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     switch(msg) {
         case IQService::SECURING:
             securing(value);
@@ -62,12 +70,33 @@ void QClient::notifyCallback(uint32_t msg, uint32_t value) {
         case IQService::UNSECURING:
             unsecuring(value);
             break;
+<<<<<<< HEAD
         default:
             return;
     }
 }
 
 void QClient::securing(uint32_t startEnd) {
+=======
+        case IQService::SCREEN_REFRESH:
+            return screenRefresh();
+            break;
+        case IQService::EXTERNAL_ORIENTATION:
+            setExtOrientation(value);
+            break;
+        default:
+            return NO_ERROR;
+    }
+    return NO_ERROR;
+}
+
+void QClient::securing(uint32_t startEnd) {
+    Locker::Autolock _sl(mHwcContext->mDrawLock);
+    //The only way to make this class in this process subscribe to media
+    //player's death.
+    IMediaDeathNotifier::getMediaPlayerService();
+
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     mHwcContext->mSecuring = startEnd;
     //We're done securing
     if(startEnd == IQService::END)
@@ -77,6 +106,10 @@ void QClient::securing(uint32_t startEnd) {
 }
 
 void QClient::unsecuring(uint32_t startEnd) {
+<<<<<<< HEAD
+=======
+    Locker::Autolock _sl(mHwcContext->mDrawLock);
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     mHwcContext->mSecuring = startEnd;
     //We're done unsecuring
     if(startEnd == IQService::END)
@@ -86,6 +119,10 @@ void QClient::unsecuring(uint32_t startEnd) {
 }
 
 void QClient::MPDeathNotifier::died() {
+<<<<<<< HEAD
+=======
+    Locker::Autolock _sl(mHwcContext->mDrawLock);
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     ALOGD_IF(QCLIENT_DEBUG, "Media Player died");
     mHwcContext->mSecuring = false;
     mHwcContext->mSecureMode = false;
@@ -93,4 +130,20 @@ void QClient::MPDeathNotifier::died() {
         mHwcContext->proc->invalidate(mHwcContext->proc);
 }
 
+<<<<<<< HEAD
+=======
+android::status_t QClient::screenRefresh() {
+    status_t result = NO_INIT;
+    if(mHwcContext->proc) {
+        mHwcContext->proc->invalidate(mHwcContext->proc);
+        result = NO_ERROR;
+    }
+    return result;
+}
+
+void QClient::setExtOrientation(uint32_t orientation) {
+    mHwcContext->mExtOrientation = orientation;
+}
+
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 }

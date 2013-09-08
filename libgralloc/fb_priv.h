@@ -1,6 +1,10 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
+<<<<<<< HEAD
  * Copyright (c) 2012, The Linux Foundation. All rights reserved.
+=======
+ * Copyright (c) 2013, The Linux Foundation. All rights reserved.
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,13 +56,6 @@ struct private_module_t {
     float fps;
     uint32_t swapInterval;
     uint32_t currentOffset;
-    bool fbPostDone;
-    pthread_mutex_t fbPostLock;
-    //Condition to inform HWC that fb_post called
-    pthread_cond_t fbPostCond;
-    bool fbPanDone;
-    pthread_mutex_t fbPanLock;
-    pthread_cond_t fbPanCond;
 };
 
 

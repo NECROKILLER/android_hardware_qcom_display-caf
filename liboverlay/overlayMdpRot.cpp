@@ -31,6 +31,7 @@ MdpRot::MdpRot() {
 
 MdpRot::~MdpRot() { close(); }
 
+<<<<<<< HEAD
 inline void MdpRot::setEnable() { mRotImgInfo.enable = 1; }
 
 inline void MdpRot::setDisable() { mRotImgInfo.enable = 0; }
@@ -56,23 +57,53 @@ inline uint32_t MdpRot::getSessId() const { return mRotImgInfo.session_id; }
 inline void MdpRot::setSrcFB() {
     mRotDataInfo.src.flags |= MDP_MEMORY_ID_TYPE_FB;
 }
+=======
+bool MdpRot::enabled() const { return mRotImgInfo.enable; }
+
+void MdpRot::setRotations(uint32_t r) { mRotImgInfo.rotations = r; }
+
+int MdpRot::getDstMemId() const {
+    return mRotDataInfo.dst.memory_id;
+}
+
+uint32_t MdpRot::getDstOffset() const {
+    return mRotDataInfo.dst.offset;
+}
+
+uint32_t MdpRot::getDstFormat() const {
+    return mRotImgInfo.dst.format;
+}
+
+uint32_t MdpRot::getSessId() const { return mRotImgInfo.session_id; }
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 
 void MdpRot::setDownscale(int ds) {
     if ((utils::ROT_DS_EIGHTH == ds) && (mRotImgInfo.src_rect.h & 0xF)) {
         // Ensure src_rect.h is a multiple of 16 for 1/8 downscaling.
         // This is an undocumented MDP Rotator constraint.
+<<<<<<< HEAD
         // Note that src_rect.h is already ensured to be 32 pixel height aligned
         // for MDP_Y_CRCB_H2V2_TILE and MDP_Y_CBCR_H2V2_TILE formats.
+=======
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
         mRotImgInfo.src_rect.h = utils::aligndown(mRotImgInfo.src_rect.h, 16);
     }
     mRotImgInfo.downscale_ratio = ds;
 }
 
+<<<<<<< HEAD
 inline void MdpRot::save() {
     mLSRotImgInfo = mRotImgInfo;
 }
 
 inline bool MdpRot::rotConfChanged() const {
+=======
+void MdpRot::save() {
+    mLSRotImgInfo = mRotImgInfo;
+}
+
+bool MdpRot::rotConfChanged() const {
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     // 0 means same
     if(0 == ::memcmp(&mRotImgInfo, &mLSRotImgInfo,
                 sizeof (msm_rotator_img_info))) {
@@ -92,13 +123,7 @@ bool MdpRot::init()
 
 void MdpRot::setSource(const overlay::utils::Whf& awhf) {
     utils::Whf whf(awhf);
-
     mRotImgInfo.src.format = whf.format;
-    if(whf.format == MDP_Y_CRCB_H2V2_TILE ||
-        whf.format == MDP_Y_CBCR_H2V2_TILE) {
-        whf.w =  utils::alignup(awhf.w, 64);
-        whf.h = utils::alignup(awhf.h, 32);
-    }
 
     mRotImgInfo.src.width = whf.w;
     mRotImgInfo.src.height = whf.h;
@@ -116,7 +141,11 @@ inline void MdpRot::setFlags(const utils::eMdpFlags& flags) {
         mRotImgInfo.secure = 1;
 }
 
+<<<<<<< HEAD
 inline void MdpRot::setTransform(const utils::eTransform& rot)
+=======
+void MdpRot::setTransform(const utils::eTransform& rot)
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 {
     int r = utils::getMdpOrient(rot);
     setRotations(r);
@@ -124,6 +153,7 @@ inline void MdpRot::setTransform(const utils::eTransform& rot)
     //Clients in Android dont factor in 90 rotation while deciding the flip.
     mOrientation = static_cast<utils::eTransform>(r);
     ALOGE_IF(DEBUG_OVERLAY, "%s: r=%d", __FUNCTION__, r);
+<<<<<<< HEAD
 }
 
 inline void MdpRot::setRotatorUsed(const bool& rotUsed) {
@@ -131,6 +161,8 @@ inline void MdpRot::setRotatorUsed(const bool& rotUsed) {
     if(rotUsed) {
         setEnable();
     }
+=======
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 }
 
 inline void MdpRot::doTransform() {
@@ -141,9 +173,11 @@ inline void MdpRot::doTransform() {
 bool MdpRot::commit() {
     doTransform();
     if(rotConfChanged()) {
+        mRotImgInfo.enable = 1;
         if(!overlay::mdp_wrapper::startRotator(mFd.getFD(), mRotImgInfo)) {
             ALOGE("MdpRot commit failed");
             dump();
+            mRotImgInfo.enable = 0;
             return false;
         }
         save();

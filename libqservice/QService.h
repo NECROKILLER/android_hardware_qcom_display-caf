@@ -48,6 +48,11 @@ public:
     virtual void securing(uint32_t startEnd);
     virtual void unsecuring(uint32_t startEnd);
     virtual void connect(const android::sp<qClient::IQClient>& client);
+<<<<<<< HEAD
+=======
+    virtual android::status_t screenRefresh();
+    virtual void setExtOrientation(uint32_t orientation);
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     static void init();
 private:
     QService();

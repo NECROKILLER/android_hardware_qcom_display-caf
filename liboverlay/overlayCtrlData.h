@@ -58,15 +58,21 @@ public:
     bool close();
 
     /* set source using whf, orient and wait flag */
-    bool setSource(const utils::PipeArgs& args);
+    void setSource(const utils::PipeArgs& args);
     /* set crop info and pass it down to mdp */
-    bool setCrop(const utils::Dim& d);
+    void setCrop(const utils::Dim& d);
     /* set orientation */
+<<<<<<< HEAD
     bool setTransform(const utils::eTransform& p);
     /* set whether rotator can be used */
     void setRotatorUsed(const bool& rotUsed);
+=======
+    void setTransform(const utils::eTransform& p);
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     /* set mdp position using dim */
-    bool setPosition(const utils::Dim& dim);
+    void setPosition(const utils::Dim& dim);
+    /* set mdp visual params using metadata */
+    bool setVisualParams(const MetaData_t &metadata);
     /* mdp set overlay/commit changes */
     bool commit();
 
@@ -74,6 +80,7 @@ public:
     int  getPipeId() const;
     /* ctrl fd */
     int  getFd() const;
+<<<<<<< HEAD
 
     /* access for screen info */
     utils::ScreenInfo getScreenInfo() const;
@@ -93,21 +100,27 @@ public:
     /* Update the src format */
     void updateSrcformat(const uint32_t& inputsrcFormat);
 
+=======
+    /* retrieve crop data */
+    utils::Dim getCrop() const;
+    utils::Dim getPosition() const;
+    /* Set downscale */
+    void setDownscale(int dscale_factor);
+    /* Update the src format based on rotator's dest */
+    void updateSrcFormat(const uint32_t& rotDstFormat);
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     /* dump the state of the object */
     void dump() const;
+    /* Return the dump in the specified buffer */
+    void getDump(char *buf, size_t len);
+    void forceSet();
 
     /* Return the dump in the specified buffer */
     void getDump(char *buf, size_t len);
 
 private:
-    /* Retrieve screen info from underlying mdp */
-    bool getScreenInfo(utils::ScreenInfo& info);
-
     // mdp ctrl struct(info e.g.)
     MdpCtrl mMdp;
-
-    /* Screen info */
-    utils::ScreenInfo mInfo;
 };
 
 
@@ -115,27 +128,22 @@ class Data : utils::NoCopy {
 public:
     /* init, reset */
     explicit Data();
-
     /* calls close */
     ~Data();
-
     /* init fd etc */
     bool init(uint32_t fbnum);
-
     /* calls underlying mdp close */
     bool close();
-
     /* set overlay pipe id in the mdp struct */
     void setPipeId(int id);
-
     /* get overlay id in the mdp struct */
     int getPipeId() const;
-
     /* queue buffer to the overlay */
     bool queueBuffer(int fd, uint32_t offset);
-
     /* sump the state of the obj */
     void dump() const;
+    /* Return the dump in the specified buffer */
+    void getDump(char *buf, size_t len);
 
     /* Return the dump in the specified buffer */
     void getDump(char *buf, size_t len);
@@ -171,17 +179,53 @@ inline bool Ctrl::close() {
     return true;
 }
 
-inline bool Ctrl::commit() {
-    if(!mMdp.set()) {
-        ALOGE("Ctrl commit failed set overlay");
+inline bool Ctrl::init(uint32_t fbnum) {
+    // MDP/FD init
+    if(!mMdp.init(fbnum)) {
+        ALOGE("Ctrl failed to init fbnum=%d", fbnum);
         return false;
     }
     return true;
 }
 
-inline bool Ctrl::getScreenInfo(utils::ScreenInfo& info) {
-    if(!mMdp.getScreenInfo(info)){
-        ALOGE("Ctrl failed to get screen info");
+inline void Ctrl::setSource(const utils::PipeArgs& args)
+{
+    mMdp.setSource(args);
+}
+
+inline void Ctrl::setPosition(const utils::Dim& dim)
+{
+    mMdp.setPosition(dim);
+}
+
+inline void Ctrl::setTransform(const utils::eTransform& orient)
+{
+    mMdp.setTransform(orient);
+}
+
+inline void Ctrl::setCrop(const utils::Dim& d)
+{
+    mMdp.setCrop(d);
+}
+
+inline bool Ctrl::setVisualParams(const MetaData_t &metadata)
+{
+    if (!mMdp.setVisualParams(metadata)) {
+        ALOGE("Ctrl setVisualParams failed in MDP setVisualParams");
+        return false;
+    }
+    return true;
+}
+
+inline void Ctrl::dump() const {
+    ALOGE("== Dump Ctrl start ==");
+    mMdp.dump();
+    ALOGE("== Dump Ctrl end ==");
+}
+
+inline bool Ctrl::commit() {
+    if(!mMdp.set()) {
+        ALOGE("Ctrl commit failed set overlay");
         return false;
     }
     return true;
@@ -195,18 +239,24 @@ inline int Ctrl::getFd() const {
     return mMdp.getFd();
 }
 
+<<<<<<< HEAD
 inline void Ctrl::updateSrcformat(const uint32_t& inputsrcFormat) {
     mMdp.updateSrcformat(inputsrcFormat);
 }
 
 inline utils::ScreenInfo Ctrl::getScreenInfo() const {
     return mInfo;
+=======
+inline void Ctrl::updateSrcFormat(const uint32_t& rotDstFmt) {
+    mMdp.updateSrcFormat(rotDstFmt);
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 }
 
 inline utils::Dim Ctrl::getCrop() const {
     return mMdp.getSrcRectDim();
 }
 
+<<<<<<< HEAD
 inline void Ctrl::doTransform() {
     return mMdp.doTransform();
 }
@@ -217,12 +267,27 @@ inline void Ctrl::doDownscale(int dscale_factor) {
 
 inline int Ctrl::getDownscalefactor() {
     return mMdp.getDownscalefactor();
+=======
+inline utils::Dim Ctrl::getPosition() const {
+    return mMdp.getDstRectDim();
+}
+
+inline void Ctrl::setDownscale(int dscale_factor) {
+    mMdp.setDownscale(dscale_factor);
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 }
 
 inline void Ctrl::getDump(char *buf, size_t len) {
     mMdp.getDump(buf, len);
 }
 
+<<<<<<< HEAD
+=======
+inline void Ctrl::forceSet() {
+    mMdp.forceSet();
+}
+
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 inline Data::Data() {
     mMdp.reset();
 }

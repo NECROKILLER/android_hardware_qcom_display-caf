@@ -1,5 +1,9 @@
 /*
+<<<<<<< HEAD
 * Copyright (c) 2011-2012, The Linux Foundation. All rights reserved.
+=======
+* Copyright (c) 2011-2013, The Linux Foundation. All rights reserved.
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 *
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted provided that the following conditions are
@@ -32,12 +36,24 @@
 
 #include "overlayUtils.h"
 #include "utils/threads.h"
+<<<<<<< HEAD
+=======
+
+struct MetaData_t;
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 
 namespace overlay {
 class GenericPipe;
 
 class Overlay : utils::NoCopy {
 public:
+    //Abstract Display types. Each backed by a LayerMixer,
+    //represented by a fb node.
+    //High res panels can be backed by 2 layer mixers and a single fb node.
+    enum { DPY_PRIMARY, DPY_EXTERNAL, DPY_WRITEBACK, DPY_UNUSED };
+    enum { DPY_MAX = DPY_UNUSED };
+    enum { MAX_FB_DEVICES = DPY_MAX };
+
     /* dtor close */
     ~Overlay();
 
@@ -64,23 +80,42 @@ public:
     void setCrop(const utils::Dim& d, utils::eDest dest);
     void setTransform(const int orientation, utils::eDest dest);
     void setPosition(const utils::Dim& dim, utils::eDest dest);
+<<<<<<< HEAD
+=======
+    void setVisualParams(const MetaData_t& data, utils::eDest dest);
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     bool commit(utils::eDest dest);
     bool queueBuffer(int fd, uint32_t offset, utils::eDest dest);
 
     /* Closes open pipes, called during startup */
+<<<<<<< HEAD
     static void initOverlay();
+=======
+    static int initOverlay();
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     /* Returns the singleton instance of overlay */
     static Overlay* getInstance();
     /* Returns available ("unallocated") pipes for a display */
     int availablePipes(int dpy);
+<<<<<<< HEAD
     /* set the framebuffer index for external display */
     void setExtFbNum(int fbNum);
     /* Returns framebuffer index of the current external display */
     int getExtFbNum();
+=======
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
     /* Returns pipe dump. Expects a NULL terminated buffer of big enough size
      * to populate.
      */
     void getDump(char *buf, size_t len);
+<<<<<<< HEAD
+=======
+    /* Reset usage and allocation bits on all pipes for given display */
+    void clear(int dpy);
+    /* Returns the framebuffer node backing up the display */
+    static int getFbForDpy(const int& dpy);
+    static bool displayCommit(const int& fd, uint32_t wait_for_finish = 0);
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 
 private:
     /* Ctor setup */
@@ -91,8 +126,11 @@ private:
 
     /* Just like a Facebook for pipes, but much less profile info */
     struct PipeBook {
+<<<<<<< HEAD
         enum { DPY_PRIMARY, DPY_EXTERNAL, DPY_UNUSED };
 
+=======
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
         void init();
         void destroy();
         /* Check if pipe exists and return true, false otherwise */
@@ -116,7 +154,16 @@ private:
         static bool isAllocated(int index);
         static bool isNotAllocated(int index);
 
+<<<<<<< HEAD
         static int NUM_PIPES;
+=======
+        static utils::eMdpPipeType getPipeType(utils::eDest dest);
+        static const char* getDestStr(utils::eDest dest);
+
+        static int NUM_PIPES;
+        static utils::eMdpPipeType pipeTypeLUT[utils::OV_MAX];
+
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 
     private:
         //usage tracks if a successful commit happened. So a pipe could be
@@ -139,20 +186,32 @@ private:
 
     /* Singleton Instance*/
     static Overlay *sInstance;
+<<<<<<< HEAD
     static int sExtFbIndex;
+=======
+    static int sDpyFbMap[DPY_MAX];
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 };
 
 inline void Overlay::validate(int index) {
     OVASSERT(index >=0 && index < PipeBook::NUM_PIPES, \
         "%s, Index out of bounds: %d", __FUNCTION__, index);
     OVASSERT(mPipeBook[index].valid(), "Pipe does not exist %s",
+<<<<<<< HEAD
             utils::getDestStr((utils::eDest)index));
+=======
+            PipeBook::getDestStr((utils::eDest)index));
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 }
 
 inline int Overlay::availablePipes(int dpy) {
      int avail = 0;
      for(int i = 0; i < PipeBook::NUM_PIPES; i++) {
+<<<<<<< HEAD
        if((mPipeBook[i].mDisplay == PipeBook::DPY_UNUSED ||
+=======
+       if((mPipeBook[i].mDisplay == DPY_UNUSED ||
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
            mPipeBook[i].mDisplay == dpy) && PipeBook::isNotAllocated(i)) {
                 avail++;
         }
@@ -160,12 +219,18 @@ inline int Overlay::availablePipes(int dpy) {
     return avail;
 }
 
+<<<<<<< HEAD
 inline void Overlay::setExtFbNum(int fbNum) {
     sExtFbIndex = fbNum;
 }
 
 inline int Overlay::getExtFbNum() {
     return sExtFbIndex;
+=======
+inline int Overlay::getFbForDpy(const int& dpy) {
+    OVASSERT(dpy >= 0 && dpy < DPY_MAX, "Invalid dpy %d", dpy);
+    return sDpyFbMap[dpy];
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 }
 
 inline bool Overlay::PipeBook::valid() {
@@ -212,6 +277,23 @@ inline bool Overlay::PipeBook::isNotAllocated(int index) {
     return !isAllocated(index);
 }
 
+<<<<<<< HEAD
+=======
+inline utils::eMdpPipeType Overlay::PipeBook::getPipeType(utils::eDest dest) {
+    return pipeTypeLUT[(int)dest];
+}
+
+inline const char* Overlay::PipeBook::getDestStr(utils::eDest dest) {
+    switch(getPipeType(dest)) {
+        case utils::OV_MDP_PIPE_RGB: return "RGB";
+        case utils::OV_MDP_PIPE_VG: return "VG";
+        case utils::OV_MDP_PIPE_DMA: return "DMA";
+        default: return "Invalid";
+    }
+    return "Invalid";
+}
+
+>>>>>>> 4d81b555d1fb44132f03cfd8208c0216e5a6755c
 }; // overlay
 
 #endif // OVERLAY_H
